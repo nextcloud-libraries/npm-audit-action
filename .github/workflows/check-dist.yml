@@ -7,6 +7,10 @@
 # If this workflow is run from a feature branch, it will act as an additional CI
 # check and fail if the checked-in `dist/` directory does not match what is
 # expected from the build.
+#
+# SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
+#
 name: Check Transpiled JavaScript
 
 on:

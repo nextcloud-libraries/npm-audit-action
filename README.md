@@ -1,3 +1,7 @@
+<!--
+  - SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+  - SPDX-License-Identifier: MIT
+-->
 # NPM audit action
 
 [![CodeQL](https://github.com/susnux/npm-audit-action/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/susnux/npm-audit-action/actions/workflows/codeql-analysis.yml)

@@ -1,3 +1,7 @@
+/**
+ * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: MIT
+ */
 import type { NPMAudit, NPMAuditFix, Vulnerability, VulnerabilityReport } from './npm-audit'
 
 import { exec } from 'node:child_process'
