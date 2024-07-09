@@ -1,8 +1,10 @@
 <!--
   - SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
   - SPDX-License-Identifier: MIT
--->
+  -->
+
 # NPM audit action
+
 [![REUSE status](https://api.reuse.software/badge/github.com/nextcloud-libraries/npm-audit-action)](https://api.reuse.software/info/github.com/nextcloud-libraries/npm-audit-action)
 [![CodeQL](https://github.com/susnux/npm-audit-action/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/susnux/npm-audit-action/actions/workflows/codeql-analysis.yml)
 ![CI](https://github.com/susnux/npm-audit-action/actions/workflows/ci.yml/badge.svg)
