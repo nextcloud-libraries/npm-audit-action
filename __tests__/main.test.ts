@@ -1,3 +1,7 @@
+/**
+ * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: MIT
+ */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { formatNpmAuditOutput, runNpmAudit } from '../src/main.js'
 

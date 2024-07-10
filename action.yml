@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: MIT
 name: 'Run NPM audit'
 description: 'Runs NPM audit fix and created a Markdown output on what changed'
 author: 'susnux'
