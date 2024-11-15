@@ -26,7 +26,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "bundle": "npm run format:write && npm run package",
+    "build": "npm run format:write && npm run package",
     "ci-test": "npx vitest run",
     "coverage": "npm run test -- --coverage && npx make-coverage-badge --output-path ./badges/coverage.svg",
     "format:write": "npx prettier --write .",
