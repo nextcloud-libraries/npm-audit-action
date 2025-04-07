@@ -83,6 +83,7 @@ describe('formatNpmAuditOutput', () => {
 			vulnerabilities: {},
 		}
 
+		/// @ts-expect-error mocking the object
 		const output = await formatNpmAuditOutput(data)
 		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
 		expect(output).toMatch(/# Audit report/)
@@ -93,14 +94,37 @@ describe('formatNpmAuditOutput', () => {
 		const data = {
 			vulnerabilities: {
 				foo: {
-					isFixable: false,
+					fixAvailable: false,
 				},
 			},
 		}
 
+		/// @ts-expect-error mocking the object
 		const output = await formatNpmAuditOutput(data)
 		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
 		expect(output).toMatch(/# Audit report/)
 		expect(output).toMatch(/No fixable problems found \(1 unfixable\)/)
+	})
+
+	it('formats output correctly for force fixable', async () => {
+		const data = {
+			vulnerabilities: {
+				foo: {
+					fixAvailable: {
+						name: 'foo',
+						version: '42.0.0',
+						isSemVerMajor: true,
+					},
+				},
+			},
+		}
+
+		/// @ts-expect-error mocking the object
+		const output = await formatNpmAuditOutput(data)
+		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
+		expect(output).toMatch(/# Audit report/)
+		expect(output).toMatch(
+			/No fixable problems found \(0 unfixable, 1 only fixable manually using --force\)/,
+		)
 	})
 })

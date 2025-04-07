@@ -91,7 +91,7 @@ export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
 			forceFixable.length > 0
 				? `, ${forceFixable.length} only fixable manually using --force`
 				: ''
-		return `No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`
+		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`
 	}
 
 	output += `

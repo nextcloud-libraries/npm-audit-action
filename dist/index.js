@@ -3080,8 +3080,29 @@ var import_promises = require("node:fs/promises");
 var import_node_path = require("node:path");
 var core = __toESM(require_core());
 var import_css = __toESM(require_css_escape());
-function isFixable(data) {
-  return typeof data === "object" && "fixAvailable" in data && data.fixAvailable;
+function isFixable(data, vul) {
+  if (vul.fixAvailable !== true) {
+    return false;
+  }
+  if (vul.isDirect) {
+    return true;
+  }
+  return vul.via.some((via) => {
+    if (typeof via !== "string") {
+      return false;
+    }
+    const parent = data.find(({ name }) => name === via);
+    return parent && isFixable(data, parent);
+  });
+}
+function getFixable(data) {
+  const generalFixable = data.filter((vul) => vul.fixAvailable !== false);
+  const fixable = generalFixable.filter((vul) => isFixable(data, vul));
+  const forceFixable = generalFixable.filter((vul) => !fixable.includes(vul));
+  return {
+    fixable,
+    forceFixable
+  };
 }
 function isReport(data) {
   return typeof data === "object" && !!data.title;
@@ -3106,11 +3127,15 @@ function runNpmAudit(fix = false) {
   );
 }
 async function formatNpmAuditOutput(data) {
-  const fixable = Object.values(data.vulnerabilities).filter(isFixable);
+  const { fixable, forceFixable } = getFixable(Object.values(data.vulnerabilities));
   core.info(`Found ${fixable.length} fixable issues`);
+  if (forceFixable.length) {
+    core.info(`And ${forceFixable.length} only fixable manually using --force`);
+  }
   let output = "# Audit report\n";
   if (fixable.length === 0) {
-    return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length} unfixable)`;
+    const forceFixableInfo = forceFixable.length > 0 ? `, ${forceFixable.length} only fixable manually using --force` : "";
+    return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`;
   }
   output += `
 This audit fix resolves ${fixable.length} of the total ${Object.values(data.vulnerabilities).length} vulnerabilities found in your project.
@@ -3176,10 +3201,11 @@ async function run() {
     }
     const issues = Object.values(data.vulnerabilities);
     const totalIssues = issues.length;
-    const fixableIssues = issues.filter(isFixable).length;
+    const { fixable, forceFixable } = getFixable(issues);
     core.setOutput("issues-total", totalIssues);
-    core.setOutput("issues-fixable", fixableIssues);
-    core.setOutput("issues-unfixable", totalIssues - fixableIssues);
+    core.setOutput("issues-fixable", fixable.length);
+    core.setOutput("issues-force-fixable", forceFixable.length);
+    core.setOutput("issues-unfixable", totalIssues - fixable.length - forceFixable.length);
     const formattedOutput = await formatNpmAuditOutput(data);
     core.setOutput("markdown", formattedOutput);
     if (outputPath) {
