@@ -3118,14 +3118,14 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 ## Updated dependencies
 `;
   for (const vul of fixable) {
-    output += `* [${vul.name}](#user-content-${CSS.escape(vul.name)})
+    output += `* [${vul.name}](#user-content-${CSS.escape(vul.name).replaceAll(/(?<=(^|[^\\]))\\(?!:\\)/g, "\\\\")})
 `;
   }
   output += "## Fixed vulnerabilities\n";
   for (const vul of fixable) {
     const info2 = vul.via.find(isReport);
     output += `
-### ${vul.name} <a href="#user-content-${CSS.escape(vul.name)}" id="${CSS.escape(vul.name)}">#</a>
+### \`${vul.name}\` <a href="#user-content-${CSS.escape(vul.name)}" id="${CSS.escape(vul.name)}">#</a>
 `;
     if (info2) {
       const cvss = info2.cvss?.score ? ` (CVSS ${info2.cvss?.score})` : "";

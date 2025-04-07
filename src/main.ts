@@ -64,13 +64,14 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 ## Updated dependencies
 `
 	for (const vul of fixable) {
-		output += `* [${vul.name}](#user-content-${CSS.escape(vul.name)})\n`
+		// we need to encode \ as \\ for Markdown
+		output += `* [${vul.name}](#user-content-${CSS.escape(vul.name).replaceAll(/(?<=(^|[^\\]))\\(?!:\\)/g, '\\\\')})\n`
 	}
 
 	output += '## Fixed vulnerabilities\n'
 	for (const vul of fixable) {
 		const info = vul.via.find(isReport)
-		output += `\n### ${vul.name} <a href="#user-content-${CSS.escape(vul.name)}" id="${CSS.escape(vul.name)}">#</a>\n`
+		output += `\n### \`${vul.name}\` <a href="#user-content-${CSS.escape(vul.name)}" id="${CSS.escape(vul.name)}">#</a>\n`
 
 		if (info) {
 			const cvss = info.cvss?.score ? ` (CVSS ${info.cvss?.score})` : ''
