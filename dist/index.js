@@ -3153,7 +3153,9 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
   }
   return output;
 }
-var isNPMAuditFix = (data) => "audit" in data;
+function isNPMAuditFix(data) {
+  return "audit" in data;
+}
 async function run() {
   try {
     const wd = core.getInput("working-directory", { required: false }) || process.env.GITHUB_WORKSPACE;
