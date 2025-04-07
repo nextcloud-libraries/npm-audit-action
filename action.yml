@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 name: 'Run NPM audit'
 description: 'Runs NPM audit fix and created a Markdown output on what changed'
-author: 'susnux'
+author: 'nextcloud'
 
 branding:
   icon: shield
@@ -19,7 +19,7 @@ inputs:
     required: false
     default: true
   output-path:
-    description: Optional output file for formatte markown
+    description: Optional output file for formatted markdown
     required: false
 
 # Define your outputs here.
