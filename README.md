@@ -44,9 +44,10 @@ The idea is to run this action together with the [create-pull-request](https://g
 
 ### Action outputs
 
-| Name               | Description                                       |
-| ------------------ | ------------------------------------------------- |
-| `markdown`         | The formatted markdown output                     |
-| `issues-total`     | Total number of issues found                      |
-| `issues-fixable`   | Number of issues fixable with `npm audit fix`     |
-| `issues-unfixable` | Number of issues not fixable with `npm audit fix` |
+| Name                   | Description                                                    |
+| ---------------------- | -------------------------------------------------------------- |
+| `markdown`             | The formatted markdown output                                  |
+| `issues-total`         | Total number of issues found                                   |
+| `issues-fixable`       | Number of issues fixable with `npm audit fix`                  |
+| `issues-force-fixable` | Number of issues manually fixable with `npm audit fix --force` |
+| `issues-unfixable`     | Number of issues not fixable with `npm audit fix`              |
