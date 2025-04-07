@@ -21,7 +21,7 @@ function isReport(data: string | VulnerabilityReport): data is VulnerabilityRepo
 
 /**
  * Run "npm audit" and return the stdout of that operation
- * @param fix If "npm audit fix" should be executed
+ * @param fix - If "npm audit fix" should be executed
  */
 export function runNpmAudit(fix = false): Promise<string> {
 	core.debug(`Running npm audit ${fix ? 'fix' : ''}…`)
@@ -46,7 +46,7 @@ export function runNpmAudit(fix = false): Promise<string> {
 
 /**
  * Format "npm audit --json" output as Markdown
- * @param json The output JSON string
+ * @param json - The output JSON string
  * @return Formatted output as markdown
  */
 export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
@@ -93,13 +93,15 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 }
 
 // Typescript helper
-const isNPMAuditFix = (data: NPMAudit | NPMAuditFix): data is NPMAuditFix => 'audit' in data
+function isNPMAuditFix(data: NPMAudit | NPMAuditFix): data is NPMAuditFix {
+	return 'audit' in data
+}
 
 /**
  * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
+ * @returns Promise that resolves when the action is complete.
  */
-export async function run() {
+export async function run(): Promise<void> {
 	try {
 		const wd =
 			core.getInput('working-directory', { required: false }) ||
