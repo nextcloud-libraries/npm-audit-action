@@ -5,4 +5,4 @@
 
 # Authors
 
--   Ferdinand Thiessen <opensource@fthiessen.de>
+- Ferdinand Thiessen <opensource@fthiessen.de>
