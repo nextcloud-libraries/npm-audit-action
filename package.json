@@ -1,17 +1,8 @@
 {
   "name": "npm-audit-action",
-  "description": "GitHub Action for running npm audit",
-  "version": "0.1.0",
-  "author": "Ferdinand Thiessen",
+  "version": "0.2.0",
   "private": true,
-  "homepage": "https://github.com/susnux/npm-audit-action#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/susnux/npm-audit-action.git"
-  },
-  "bugs": {
-    "url": "https://github.com/susnux/npm-audit-action/issues"
-  },
+  "description": "GitHub Action for running npm audit",
   "keywords": [
     "GitHub",
     "Actions",
@@ -19,31 +10,37 @@
     "NPM",
     "audit"
   ],
+  "homepage": "https://github.com/nextcloud-libraries/npm-audit-action#readme",
+  "bugs": {
+    "url": "https://github.com/nextcloud-libraries/npm-audit-action/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nextcloud-libraries/npm-audit-action.git"
+  },
+  "license": "MIT",
+  "author": "Ferdinand Thiessen",
   "exports": {
     ".": "./dist/index.js"
   },
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
+    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
     "build": "npm run format:write && npm run package",
     "ci-test": "npx vitest run",
     "coverage": "npm run test -- --coverage && npx make-coverage-badge --output-path ./badges/coverage.svg",
-    "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
+    "format:write": "npx prettier --write .",
     "lint": "npx eslint .",
     "package": "npx esbuild --platform=node --sourcemap --bundle src/index.ts --outdir=dist",
     "package:watch": "npm run package -- --watch",
-    "test": "npx vitest run",
-    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
+    "test": "npx vitest run"
   },
-  "license": "MIT",
   "prettier": {
     "printWidth": 95,
+    "semi": false,
+    "singleQuote": true,
     "tabWidth": 4,
     "useTabs": true,
-    "singleQuote": true,
-    "semi": false,
     "overrides": [
       {
         "files": [
@@ -73,5 +70,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.0",
     "vitest": "^3.1.1"
+  },
+  "engines": {
+    "node": "^20 || ^22"
   }
 }
