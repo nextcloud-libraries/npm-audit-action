@@ -11,8 +11,37 @@ import * as core from '@actions/core'
 
 import 'css.escape'
 
-function isFixable(data: Vulnerability): data is Vulnerability & { fixAvailable: true } {
-	return typeof data === 'object' && 'fixAvailable' in data && data.fixAvailable
+function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
+	if (vul.fixAvailable !== true) {
+		// could be "false" -> not fixable at all
+		// or an object -> only with --force
+		return false
+	}
+
+	// direct dependencies can be fixed
+	if (vul.isDirect) {
+		return true
+	}
+
+	return vul.via.some((via) => {
+		if (typeof via !== 'string') {
+			// this is a advisatory and no fix available - skip
+			return false
+		}
+		const parent = data.find(({ name }) => name === via)
+		return parent && isFixable(data, parent)
+	})
+}
+
+function getFixable(data: Vulnerability[]) {
+	const generalFixable = data.filter((vul) => vul.fixAvailable !== false)
+	const fixable = generalFixable.filter((vul) => isFixable(data, vul))
+	const forceFixable = generalFixable.filter((vul) => !fixable.includes(vul))
+
+	return {
+		fixable,
+		forceFixable,
+	}
 }
 
 function isReport(data: string | VulnerabilityReport): data is VulnerabilityReport {
@@ -50,12 +79,19 @@ export function runNpmAudit(fix = false): Promise<string> {
  * @return Formatted output as markdown
  */
 export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
-	const fixable = Object.values(data.vulnerabilities).filter(isFixable)
+	const { fixable, forceFixable } = getFixable(Object.values(data.vulnerabilities))
 	core.info(`Found ${fixable.length} fixable issues`)
+	if (forceFixable.length) {
+		core.info(`And ${forceFixable.length} only fixable manually using --force`)
+	}
 
 	let output = '# Audit report\n'
 	if (fixable.length === 0) {
-		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length} unfixable)`
+		const forceFixableInfo =
+			forceFixable.length > 0
+				? `, ${forceFixable.length} only fixable manually using --force`
+				: ''
+		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`
 	}
 
 	output += `
@@ -130,10 +166,11 @@ export async function run(): Promise<void> {
 
 		const issues = Object.values(data.vulnerabilities)
 		const totalIssues = issues.length
-		const fixableIssues = issues.filter(isFixable).length
+		const { fixable, forceFixable } = getFixable(issues)
 		core.setOutput('issues-total', totalIssues)
-		core.setOutput('issues-fixable', fixableIssues)
-		core.setOutput('issues-unfixable', totalIssues - fixableIssues)
+		core.setOutput('issues-fixable', fixable.length)
+		core.setOutput('issues-force-fixable', forceFixable.length)
+		core.setOutput('issues-unfixable', totalIssues - fixable.length - forceFixable.length)
 
 		const formattedOutput = await formatNpmAuditOutput(data)
 		core.setOutput('markdown', formattedOutput)
