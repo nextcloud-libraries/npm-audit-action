@@ -30,7 +30,7 @@
     "coverage": "npm run test -- --coverage && npx make-coverage-badge --output-path ./badges/coverage.svg",
     "format:check": "npx prettier --check .",
     "format:write": "npx prettier --write .",
-    "lint": "npx eslint .",
+    "lint": "eslint",
     "package": "npx esbuild --platform=node --sourcemap --bundle src/index.ts --outdir=dist",
     "package:watch": "npm run package -- --watch",
     "test": "npx vitest run"
@@ -63,12 +63,11 @@
     "@types/node": "^24.2.0",
     "@vitest/coverage-v8": "^3.1.1",
     "esbuild": "^0.25.2",
-    "eslint": "^8.57.0",
-    "eslint-plugin-github": "^5.0.2",
+    "eslint": "^9.37.0",
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.29.1",
+    "typescript-eslint": "^8.46.1",
     "vitest": "^3.1.1"
   },
   "engines": {

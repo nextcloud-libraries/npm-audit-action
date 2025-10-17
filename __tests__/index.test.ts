@@ -11,7 +11,7 @@ vi.mock('../src/main', () => main)
 
 describe('index', () => {
 	it('calls run when imported', async () => {
-		await import('../src/index.js')
+		await import('../src/index.ts')
 
 		expect(main.run).toHaveBeenCalled()
 	})
