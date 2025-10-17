@@ -5,4 +5,6 @@
 
 # Authors
 
+- Andy Scherzinger <info@andy-scherzinger.de>
 - Ferdinand Thiessen <opensource@fthiessen.de>
+- Grigorii K. Shartsev <me@shgk.me>
