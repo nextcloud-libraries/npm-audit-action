@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"moduleResolution": "Node16",
 		"module": "NodeNext",
-		"target": "ES2022"
+		"target": "ES2022",
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true
 	}
 }
