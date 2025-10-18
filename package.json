@@ -19,7 +19,7 @@
     "url": "git+https://github.com/nextcloud-libraries/npm-audit-action.git"
   },
   "license": "MIT",
-  "author": "Ferdinand Thiessen",
+  "author": "Nextcloud GmbH and Nextcloud contributors",
   "exports": {
     ".": "./dist/index.js"
   },
