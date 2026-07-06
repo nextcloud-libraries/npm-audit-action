@@ -28,5 +28,5 @@ outputs:
     description: "Formatted output what can be fixed with 'npm audit fix'"
 
 runs:
-  using: node20
+  using: node24
   main: dist/index.js

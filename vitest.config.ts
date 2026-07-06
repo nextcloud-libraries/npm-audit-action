@@ -2,7 +2,8 @@
  * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: MIT
  */
-import { defineConfig } from 'vite'
+
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
 	test: {
