@@ -1,0 +1,7 @@
+{
+	"name": "example-vulnerable-package",
+	"private": true,
+	"dependencies": {
+		"axios": "^1.14.0"
+	}
+}
