@@ -20,54 +20,33 @@
   },
   "license": "MIT",
   "author": "Nextcloud GmbH and Nextcloud contributors",
+  "type": "module",
   "exports": {
     ".": "./dist/index.js"
   },
   "scripts": {
-    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
-    "build": "npm run format:write && npm run package",
+    "all": "npm run lint && npm run test && npm run coverage && npm run package",
+    "build": "npm run package",
     "ci-test": "npx vitest run",
     "coverage": "npm run test -- --coverage && npx make-coverage-badge --output-path ./badges/coverage.svg",
-    "format:check": "npx prettier --check .",
-    "format:write": "npx prettier --write .",
     "lint": "eslint",
-    "package": "npx esbuild --platform=node --sourcemap --bundle src/index.ts --outdir=dist",
+    "lint:fix": "eslint --fix",
+    "package": "npx rolldown -c rolldown.config.ts",
     "package:watch": "npm run package -- --watch",
     "test": "npx vitest run"
-  },
-  "prettier": {
-    "printWidth": 95,
-    "semi": false,
-    "singleQuote": true,
-    "tabWidth": 4,
-    "useTabs": true,
-    "overrides": [
-      {
-        "files": [
-          "package.json",
-          "package-lock.json",
-          "*.yml"
-        ],
-        "options": {
-          "tabWidth": 2,
-          "useTabs": false
-        }
-      }
-    ]
   },
   "dependencies": {
     "@actions/core": "^3.0.1",
     "css.escape": "^1.5.1"
   },
   "devDependencies": {
+    "@nextcloud/eslint-config": "^9.0.0",
     "@types/node": "^24.2.0",
     "@vitest/coverage-v8": "^3.1.1",
-    "esbuild": "^0.27.3",
-    "eslint": "^9.37.0",
+    "eslint": "^10.6.0",
     "make-coverage-badge": "^1.2.0",
-    "prettier": "^3.8.1",
+    "rolldown": "^1.1.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
     "vitest": "^3.1.1"
   },
   "engines": {
