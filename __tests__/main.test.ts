@@ -2,18 +2,30 @@
  * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: MIT
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { formatNpmAuditOutput, getFixable, runNpmAudit } from '../src/main.js'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { formatNpmAuditOutput, getFixable, run, runNpmAudit } from '../src/main.js'
 
 const core = vi.hoisted(() => ({
 	debug: vi.fn(),
 	info: vi.fn(),
+	warning: vi.fn(),
+	getInput: vi.fn(),
+	getBooleanInput: vi.fn(),
+	setOutput: vi.fn(),
+	setFailed: vi.fn(),
 }))
 const childProcess = vi.hoisted(() => ({
 	exec: vi.fn(),
 }))
+const changes = vi.hoisted(() => ({
+	getChanges: vi.fn(),
+}))
 vi.mock('node:child_process', () => childProcess)
 vi.mock('@actions/core', () => core)
+vi.mock('../src/changes.ts', async (importOriginal) => ({
+	...await importOriginal<Record<string, unknown>>(),
+	...changes,
+}))
 
 describe('runNpmAudit', () => {
 	beforeEach(() => {
@@ -206,5 +218,44 @@ describe('getFixable', () => {
 		/// @ts-expect-error mocking the object
 		const { fixable } = getFixable(data)
 		expect(fixable.map((vul) => vul.name).sort()).toEqual(['a', 'b', 'root'])
+	})
+})
+
+describe('run', () => {
+	beforeEach(() => {
+		vi.resetAllMocks()
+		vi.spyOn(process, 'chdir').mockImplementation(() => {})
+		vi.stubEnv('GITHUB_WORKSPACE', '/workspace')
+		core.getInput.mockReturnValue('')
+		core.getBooleanInput.mockReturnValue(true)
+		childProcess.exec.mockImplementation((command, callback) => {
+			callback(null, '{"vulnerabilities": {}}', '')
+		})
+	})
+
+	afterEach(() => {
+		vi.restoreAllMocks()
+		vi.unstubAllEnvs()
+	})
+
+	it('appends the changed dependencies after fixing', async () => {
+		changes.getChanges.mockResolvedValueOnce([{ type: 'add', key: 'node_modules/foo', name: 'foo', version: '1.0.0' }])
+
+		await run()
+		expect(core.setFailed).not.toHaveBeenCalled()
+		expect(childProcess.exec.mock.calls[1][0]).toMatch('npm audit --json fix')
+		const markdown = core.setOutput.mock.calls.find(([name]) => name === 'markdown')?.[1]
+		expect(markdown).toMatch(/\(0 unfixable\)\n\n## Updated dependencies\n/)
+		expect(markdown).toMatch('* `foo` @ 1.0.0')
+	})
+
+	it('still sets the output if the changes cannot be listed', async () => {
+		changes.getChanges.mockRejectedValueOnce(new Error('not a git repository'))
+
+		await run()
+		expect(core.setFailed).not.toHaveBeenCalled()
+		expect(core.warning).toHaveBeenCalledWith(expect.stringMatching(/not a git repository/))
+		const markdown = core.setOutput.mock.calls.find(([name]) => name === 'markdown')?.[1]
+		expect(markdown).toMatch(/^# Audit report\nNo fixable problems found \(0 unfixable\)$/)
 	})
 })

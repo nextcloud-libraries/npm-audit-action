@@ -56,8 +56,11 @@ jobs:
         id: test-action
         uses: ./
         with:
-          fix: false
+          fix: true
+          working-directory: __tests__/__fixtures__/vulnerable
 
       - name: Print Output
         id: output
-        run: echo "${{ steps.test-action.outputs.markdown }}"
+        env:
+          MARKDOWN: ${{ steps.test-action.outputs.markdown }}
+        run: printf '%s\n' "$MARKDOWN"
