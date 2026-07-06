@@ -4,13 +4,18 @@
  */
 import type { NPMAudit, NPMAuditFix, Vulnerability, VulnerabilityReport } from './npm-audit'
 
+import * as core from '@actions/core'
 import { exec } from 'node:child_process'
 import { writeFile } from 'node:fs/promises'
 import { resolve as resolvePath } from 'node:path'
-import * as core from '@actions/core'
 
 import 'css.escape'
 
+/**
+ *
+ * @param data
+ * @param vul
+ */
 function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
 	if (vul.fixAvailable !== true) {
 		// could be "false" -> not fixable at all
@@ -33,6 +38,10 @@ function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
 	})
 }
 
+/**
+ *
+ * @param data
+ */
 function getFixable(data: Vulnerability[]) {
 	const generalFixable = data.filter((vul) => vul.fixAvailable !== false)
 	const fixable = generalFixable.filter((vul) => isFixable(data, vul))
@@ -44,38 +53,43 @@ function getFixable(data: Vulnerability[]) {
 	}
 }
 
+/**
+ *
+ * @param data
+ */
 function isReport(data: string | VulnerabilityReport): data is VulnerabilityReport {
 	return typeof data === 'object' && !!data.title
 }
 
 /**
  * Run "npm audit" and return the stdout of that operation
+ *
  * @param fix - If "npm audit fix" should be executed
  */
 export function runNpmAudit(fix = false): Promise<string> {
 	core.debug(`Running npm audit ${fix ? 'fix' : ''}…`)
 
-	return new Promise((resolve, reject) =>
-		exec(`npm audit --json ${fix ? 'fix' : ''}`, (error, stdout, stderr) => {
-			if (error) {
-				core.debug(`[npm audit] Error: ${error.message}`)
-			}
-			if (stderr) {
-				core.debug(`[npm audit]: ${stderr}`)
-			}
-			if (stdout) {
-				core.debug(`[npm audit]: ${stdout}`)
-				resolve(stdout.slice(stdout.indexOf('{')))
-				return
-			}
-			reject(error)
-		}),
-	)
+	return new Promise((resolve, reject) => exec(`npm audit --json ${fix ? 'fix' : ''}`, (error, stdout, stderr) => {
+		if (error) {
+			core.debug(`[npm audit] Error: ${error.message}`)
+		}
+		if (stderr) {
+			core.debug(`[npm audit]: ${stderr}`)
+		}
+		if (stdout) {
+			core.debug(`[npm audit]: ${stdout}`)
+			resolve(stdout.slice(stdout.indexOf('{')))
+			return
+		}
+		reject(error)
+	}))
 }
 
 /**
  * Format "npm audit --json" output as Markdown
+ *
  * @param json - The output JSON string
+ * @param data
  * @return Formatted output as markdown
  */
 export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
@@ -87,8 +101,8 @@ export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
 
 	let output = '# Audit report\n'
 	if (fixable.length === 0) {
-		const forceFixableInfo =
-			forceFixable.length > 0
+		const forceFixableInfo
+			= forceFixable.length > 0
 				? `, ${forceFixable.length} only fixable manually using --force`
 				: ''
 		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`
@@ -115,7 +129,7 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 			output += `* Severity: **${info.severity}**${info.severity === 'critical' ? ' 🚨' : ''}${cvss}\n`
 			output += `* Reference: [${info.url}](${info.url})\n`
 		} else {
-			output += `* Caused by vulnerable dependency:\n`
+			output += '* Caused by vulnerable dependency:\n'
 			for (const via of vul.via as string[]) {
 				output += `  * [${via}](#user-content-${CSS.escape(via)})\n`
 			}
@@ -130,19 +144,24 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 }
 
 // Typescript helper
+/**
+ *
+ * @param data
+ */
 function isNPMAuditFix(data: NPMAudit | NPMAuditFix): data is NPMAuditFix {
 	return 'audit' in data
 }
 
 /**
  * The main function for the action.
- * @returns Promise that resolves when the action is complete.
+ *
+ * @return Promise that resolves when the action is complete.
  */
 export async function run(): Promise<void> {
 	try {
-		const wd =
-			core.getInput('working-directory', { required: false }) ||
-			process.env.GITHUB_WORKSPACE
+		const wd
+			= core.getInput('working-directory', { required: false })
+				|| process.env.GITHUB_WORKSPACE
 		const outputPath = core.getInput('output-path', { required: false })
 		const fix = core.getBooleanInput('fix', { required: false })
 

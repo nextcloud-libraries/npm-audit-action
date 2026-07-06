@@ -123,8 +123,6 @@ describe('formatNpmAuditOutput', () => {
 		const output = await formatNpmAuditOutput(data)
 		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
 		expect(output).toMatch(/# Audit report/)
-		expect(output).toMatch(
-			/No fixable problems found \(0 unfixable, 1 only fixable manually using --force\)/,
-		)
+		expect(output).toMatch(/No fixable problems found \(0 unfixable, 1 only fixable manually using --force\)/)
 	})
 })

@@ -2,7 +2,6 @@
   "name": "npm-audit-action",
   "version": "0.2.0",
   "private": true,
-  "type": "module",
   "description": "GitHub Action for running npm audit",
   "keywords": [
     "GitHub",
@@ -21,6 +20,7 @@
   },
   "license": "MIT",
   "author": "Nextcloud GmbH and Nextcloud contributors",
+  "type": "module",
   "exports": {
     ".": "./dist/index.js"
   },
