@@ -5,6 +5,5 @@
 
 import { recommendedLibrary } from '@nextcloud/eslint-config'
 import { defineConfig } from 'eslint/config'
-import tseslint from 'typescript-eslint'
 
 export default defineConfig([...recommendedLibrary])

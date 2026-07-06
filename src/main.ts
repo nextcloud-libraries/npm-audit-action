@@ -2,7 +2,8 @@
  * SPDX-FileCopyrightText: 2024 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: MIT
  */
-import type { NPMAudit, NPMAuditFix, Vulnerability, VulnerabilityReport } from './npm-audit'
+
+import type { NPMAudit, NPMAuditFix, Vulnerability, VulnerabilityReport } from './npm-audit.d.ts'
 
 import * as core from '@actions/core'
 import { exec } from 'node:child_process'
@@ -12,9 +13,11 @@ import { resolve as resolvePath } from 'node:path'
 import 'css.escape'
 
 /**
+ * Check if a vulnerability is fixable by checking if it has a fix available
+ * and if it is a direct dependency or if its parent dependencies are fixable.
  *
- * @param data
- * @param vul
+ * @param data - The list of vulnerabilities to check against
+ * @param vul - The vulnerability to check
  */
 function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
 	if (vul.fixAvailable !== true) {
@@ -39,8 +42,9 @@ function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
 }
 
 /**
+ * Get the fixable and force-fixable vulnerabilities from the given data
  *
- * @param data
+ * @param data - The list of vulnerabilities to check
  */
 function getFixable(data: Vulnerability[]) {
 	const generalFixable = data.filter((vul) => vul.fixAvailable !== false)
@@ -54,8 +58,9 @@ function getFixable(data: Vulnerability[]) {
 }
 
 /**
+ * Check if the given data is of type VulnerabilityReport
  *
- * @param data
+ * @param data - The data to check
  */
 function isReport(data: string | VulnerabilityReport): data is VulnerabilityReport {
 	return typeof data === 'object' && !!data.title
@@ -88,8 +93,7 @@ export function runNpmAudit(fix = false): Promise<string> {
 /**
  * Format "npm audit --json" output as Markdown
  *
- * @param json - The output JSON string
- * @param data
+ * @param data - The parsed JSON data
  * @return Formatted output as markdown
  */
 export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
@@ -143,10 +147,10 @@ This audit fix resolves ${fixable.length} of the total ${Object.values(data.vuln
 	return output
 }
 
-// Typescript helper
 /**
+ * Check if the given data is of type NPMAuditFix
  *
- * @param data
+ * @param data - The data to check
  */
 function isNPMAuditFix(data: NPMAudit | NPMAuditFix): data is NPMAuditFix {
 	return 'audit' in data
@@ -159,9 +163,8 @@ function isNPMAuditFix(data: NPMAudit | NPMAuditFix): data is NPMAuditFix {
  */
 export async function run(): Promise<void> {
 	try {
-		const wd
-			= core.getInput('working-directory', { required: false })
-				|| process.env.GITHUB_WORKSPACE
+		const wd = core.getInput('working-directory', { required: false })
+			|| process.env.GITHUB_WORKSPACE!
 		const outputPath = core.getInput('output-path', { required: false })
 		const fix = core.getBooleanInput('fix', { required: false })
 
@@ -196,7 +199,7 @@ export async function run(): Promise<void> {
 
 		if (outputPath) {
 			const resolvedPath = resolvePath(outputPath)
-			if (!resolvedPath.startsWith(resolvePath(process.env.GITHUB_WORKSPACE))) {
+			if (!resolvedPath.startsWith(resolvePath(process.env.GITHUB_WORKSPACE!))) {
 				core.setFailed('Invalid "output-path"')
 				return
 			}
@@ -208,7 +211,10 @@ export async function run(): Promise<void> {
 			await runNpmAudit(true)
 		}
 	} catch (error) {
-		// Fail the workflow run if an error occurs
-		core.setFailed(error.message)
+		if (error instanceof Error) {
+			core.setFailed(error)
+		} else {
+			core.setFailed(String(error))
+		}
 	}
 }
