@@ -11,7 +11,28 @@ import "timers";
 import { exec } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+//#region \0rolldown/runtime.js
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
+var __copyProps = (to, from, except, desc) => {
+	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+		key = keys[i];
+		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
+			get: ((k) => from[k]).bind(null, key),
+			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+		});
+	}
+	return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+	value: mod,
+	enumerable: true
+}) : target, mod));
 var __require = /* #__PURE__ */ (() => createRequire(import.meta.url))();
 //#endregion
 //#region node_modules/@actions/core/lib/utils.js
@@ -16370,6 +16391,368 @@ function error(message, properties = {}) {
 function info(message) {
 	process.stdout.write(message + os$1.EOL);
 }
+//#endregion
+//#region node_modules/diff-package-lock/dist/PackageChange.js
+var require_PackageChange = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var PackageChange = class {
+		constructor(a, b) {
+			this.a = a;
+			this.b = b;
+		}
+	};
+	exports.default = PackageChange;
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/PackageDescriptor.js
+var require_PackageDescriptor = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var PackageDescriptor = class {
+		constructor(key, name, version) {
+			this.key = key;
+			this.name = name;
+			this.version = version;
+		}
+	};
+	exports.default = PackageDescriptor;
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/colorize.js
+var require_colorize = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	const ansiStyles = Object.entries({
+		reset: 0,
+		black: 30,
+		red: 31,
+		green: 32,
+		yellow: 33,
+		blue: 34,
+		magenta: 35,
+		cyan: 36,
+		white: 37,
+		gray: 90
+	}).reduce((styles, [name, value]) => {
+		styles[name] = `\x1b[${value}m`;
+		return styles;
+	}, {});
+	function colorize(color, message) {
+		if (!ansiStyles[color]) return message;
+		return `${ansiStyles[color]}${message}${ansiStyles.reset}`;
+	}
+	exports.default = colorize;
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/TreeChange.js
+var require_TreeChange = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var __importDefault = exports && exports.__importDefault || function(mod) {
+		return mod && mod.__esModule ? mod : { "default": mod };
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.TreeChangeKey = exports.TreeChangeVersion = exports.TreeChangeRemove = exports.TreeChangeAdd = void 0;
+	const colorize_1 = __importDefault(require_colorize());
+	var TreeChangeAdd = class {
+		constructor(pkg) {
+			this.pkg = pkg;
+		}
+		toString() {
+			return (0, colorize_1.default)("green", `+ ${this.pkg.key}@${this.pkg.version}`);
+		}
+		toJSON() {
+			return {
+				type: "add",
+				key: this.pkg.key,
+				name: this.pkg.name,
+				version: this.pkg.version
+			};
+		}
+	};
+	exports.TreeChangeAdd = TreeChangeAdd;
+	var TreeChangeRemove = class {
+		constructor(pkg) {
+			this.pkg = pkg;
+		}
+		toString() {
+			return (0, colorize_1.default)("red", `- ${this.pkg.key}@${this.pkg.version}`);
+		}
+		toJSON() {
+			return {
+				type: "remove",
+				key: this.pkg.key,
+				name: this.pkg.name,
+				version: this.pkg.version
+			};
+		}
+	};
+	exports.TreeChangeRemove = TreeChangeRemove;
+	var TreeChangeVersion = class {
+		constructor(pkg, toVersion) {
+			this.pkg = pkg;
+			this.toVersion = toVersion;
+		}
+		toString() {
+			return (0, colorize_1.default)("yellow", `* ${this.pkg.key}@${this.pkg.version} -> ${this.toVersion}`);
+		}
+		toJSON() {
+			return {
+				type: "version",
+				key: this.pkg.key,
+				name: this.pkg.name,
+				fromVersion: this.pkg.version,
+				toVersion: this.toVersion
+			};
+		}
+	};
+	exports.TreeChangeVersion = TreeChangeVersion;
+	var TreeChangeKey = class {
+		constructor(pkg, toKey) {
+			this.pkg = pkg;
+			this.toKey = toKey;
+		}
+		toString() {
+			return (0, colorize_1.default)("yellow", `* ${this.pkg.key} -> ${this.toKey}`);
+		}
+		toJSON() {
+			return {
+				type: "key",
+				name: this.pkg.name,
+				version: this.pkg.version,
+				fromKey: this.pkg.key,
+				toKey: this.toKey
+			};
+		}
+	};
+	exports.TreeChangeKey = TreeChangeKey;
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/runCommand.js
+var require_runCommand = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = runCommand;
+	const child_process_1 = __require("child_process");
+	const MB = 1024 * 1024;
+	/**
+	* A wrapper around spawnSync that provides more control over command execution
+	* @param args Array of strings where the first element is the command and the rest are arguments
+	* @param options Options for the spawned process
+	* @returns The result of the command execution with standardized properties
+	*/
+	function runCommand(args, options = {}) {
+		if (args.length === 0) throw new Error("Command array must not be empty");
+		const [command, ...commandArgs] = args;
+		const defaultOptions = Object.assign({
+			encoding: "utf8",
+			stdio: "pipe",
+			maxBuffer: 100 * MB
+		}, options);
+		const result = (0, child_process_1.spawnSync)(command, commandArgs, defaultOptions);
+		if (result.error) throw result.error;
+		if (result.status !== 0) {
+			const stdout = result.stdout ? result.stdout.toString() : "";
+			const stderr = result.stderr ? result.stderr.toString() : "";
+			throw new Error([
+				`Command "${args.join(" ")}" failed with exit code ${result.status}`,
+				stdout,
+				stderr
+			].filter(Boolean).join("\n"));
+		}
+		return result;
+	}
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/readGitFile.js
+var require_readGitFile = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var __importDefault = exports && exports.__importDefault || function(mod) {
+		return mod && mod.__esModule ? mod : { "default": mod };
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = readGitFile;
+	const fs_1 = __importDefault(__require("fs"));
+	const path_1 = __importDefault(__require("path"));
+	const runCommand_1 = __importDefault(require_runCommand());
+	function readGitFile(treeish, filepath, cwd) {
+		const error = /* @__PURE__ */ new Error(`${treeish}:${filepath} does not exist`);
+		error.code = "NOT_FOUND";
+		if (treeish === "disk") {
+			const realpath = path_1.default.join(cwd, filepath);
+			if (!fs_1.default.existsSync(realpath)) throw error;
+			return fs_1.default.readFileSync(realpath);
+		}
+		if (!(0, runCommand_1.default)([
+			"git",
+			"ls-tree",
+			"--name-only",
+			treeish,
+			"--",
+			filepath
+		], { cwd }).stdout.toString()) throw error;
+		return (0, runCommand_1.default)([
+			"git",
+			"show",
+			`${treeish}:${filepath}`
+		], {
+			cwd,
+			encoding: "buffer"
+		}).stdout;
+	}
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/sortChanges.js
+var require_sortChanges = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = sortChanges;
+	function sortChanges(changes) {
+		return changes.sort((a, b) => {
+			if (a.pkg.key === b.pkg.key) return 0;
+			return a.pkg.key < b.pkg.key ? -1 : 1;
+		});
+	}
+}));
+//#endregion
+//#region node_modules/diff-package-lock/dist/typeGuards.js
+var require_typeGuards = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.isErrorWithCode = isErrorWithCode;
+	function isErrorWithCode(error) {
+		return error instanceof Error && "code" in error;
+	}
+}));
+//#endregion
+//#region src/changes.ts
+var import_Tree = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports) => {
+	var __importDefault = exports && exports.__importDefault || function(mod) {
+		return mod && mod.__esModule ? mod : { "default": mod };
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	const PackageChange_1 = __importDefault(require_PackageChange());
+	const PackageDescriptor_1 = __importDefault(require_PackageDescriptor());
+	const TreeChange_1 = require_TreeChange();
+	const readGitFile_1 = __importDefault(require_readGitFile());
+	const sortChanges_1 = __importDefault(require_sortChanges());
+	const typeGuards_1 = require_typeGuards();
+	var Tree = class {
+		constructor(treeish, { cwd }) {
+			this.treeish = treeish;
+			this.cwd = cwd;
+			this.packages = {};
+		}
+		async getJsonFile(filepath) {
+			return JSON.parse((0, readGitFile_1.default)(this.treeish, filepath, this.cwd).toString());
+		}
+		async getLockFile() {
+			const errors = [];
+			for (const file of ["./package-lock.json", "./npm-shrinkwrap.json"]) try {
+				return await this.getJsonFile(file);
+			} catch (e) {
+				if ((0, typeGuards_1.isErrorWithCode)(e) && e.code !== "NOT_FOUND") throw e;
+				errors.push(e);
+			}
+			const error = new Error(errors.map((e) => e.message).join(", "));
+			error.code = "NOT_FOUND";
+			throw error;
+		}
+		async getPackages() {
+			const lock = await this.getLockFile();
+			const { lockfileVersion = 1 } = lock;
+			if (lockfileVersion === 1 && "dependencies" in lock) return Object.entries(lock.dependencies).reduce((acc, [key, spec]) => {
+				acc[key] = new PackageDescriptor_1.default(key, key, spec.version);
+				return acc;
+			}, {});
+			if ("packages" in lock) return Object.entries(lock.packages).reduce((acc, [key, spec]) => {
+				let name = void 0;
+				if ("name" in spec) name = spec.name;
+				else {
+					const nmIndex = key.lastIndexOf("node_modules/");
+					if (nmIndex !== -1) name = key.slice(nmIndex + 13);
+				}
+				if (name) {
+					let version = "(unknown version)";
+					if ("link" in spec) version = `link:${spec.resolved}`;
+					else if (spec.version) version = spec.version;
+					acc[key] = new PackageDescriptor_1.default(key, name, version);
+				}
+				return acc;
+			}, {});
+			return {};
+		}
+		async getChanges(other) {
+			const [myPackages, theirPackages] = await Promise.all([this.getPackages(), other.getPackages()]);
+			const initial = new Set(Object.keys(myPackages));
+			const remaining = new Set(Object.keys(theirPackages));
+			const packageChanges = [];
+			for (const key of initial) {
+				remaining.delete(key);
+				packageChanges.push(new PackageChange_1.default(myPackages[key], theirPackages[key]));
+			}
+			for (const key of remaining) packageChanges.push(new PackageChange_1.default(myPackages[key], theirPackages[key]));
+			const removed = /* @__PURE__ */ new Map();
+			const added = /* @__PURE__ */ new Map();
+			const changes = packageChanges.map(({ a, b }) => {
+				if (a && b) {
+					if (a.version !== b.version) return new TreeChange_1.TreeChangeVersion(a, b.version);
+					return;
+				}
+				if (a) {
+					removed.set(`${a.name}@${a.version}`, a);
+					return;
+				}
+				if (b) added.set(`${b.name}@${b.version}`, b);
+			}).filter(Boolean);
+			for (const nv of removed.keys()) {
+				const pkgRemoved = removed.get(nv);
+				const pkgAdded = added.get(nv);
+				if (pkgRemoved && pkgAdded) {
+					added.delete(nv);
+					changes.push(new TreeChange_1.TreeChangeKey(pkgRemoved, pkgAdded.key));
+				} else if (pkgRemoved) changes.push(new TreeChange_1.TreeChangeRemove(pkgRemoved));
+			}
+			for (const nv of added.keys()) {
+				const pkgAdded = added.get(nv);
+				if (pkgAdded) changes.push(new TreeChange_1.TreeChangeAdd(pkgAdded));
+			}
+			return (0, sortChanges_1.default)(changes);
+		}
+	};
+	exports.default = Tree;
+})))(), 1);
+/**
+* Get the Markdown formatted list of changes between current HEAD and the changes on disk.
+*
+* @param cwd - The current working directory to check for changes
+*/
+async function getChanges(cwd = process.cwd()) {
+	const fromTree = new import_Tree.default.default("HEAD", { cwd });
+	const toTree = new import_Tree.default.default("disk", { cwd });
+	return (await fromTree.getChanges(toTree)).map((change) => change.toJSON());
+}
+/**
+* Format the list of changes as Markdown
+*
+* @param changes - The list of changes to format
+*/
+function formatChanges(changes) {
+	let result = "";
+	const added = changes.filter(({ type }) => type === "add");
+	if (added.length) {
+		result += "### Added dependencies\n";
+		result += added.map((change) => `* \`${change.name}\` @ ${change.version}`).join("\n");
+		result += "\n\n";
+	}
+	const removed = changes.filter(({ type }) => type === "remove");
+	if (removed.length) {
+		result += "### Removed dependencies\n";
+		result += removed.map((change) => `* \`${change.name}\` @ ${change.version}`).join("\n");
+		result += "\n\n";
+	}
+	const updated = changes.filter(({ type }) => type === "version");
+	const keyUpdated = changes.filter(({ type }) => type === "key");
+	if (updated.length || keyUpdated.length) {
+		result += "### Updated dependencies\n";
+		result += updated.map((change) => `* \`${change.name}\` from ${change.fromVersion} to ${change.toVersion}`).join("\n");
+		result += keyUpdated.map((change) => `* \`${change.name}\` @ ${change.version} from ${change.fromKey} to ${change.toKey}`).join("\n");
+		result += "\n\n";
+	}
+	return result;
+}
 /*! https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
 (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	(function(root, factory) {
@@ -16486,7 +16869,7 @@ async function formatNpmAuditOutput(data) {
 	output += `
 This audit fix resolves ${fixable.length} of the total ${Object.values(data.vulnerabilities).length} vulnerabilities found in your project.
 
-## Updated dependencies
+## Updated vulnerable dependencies
 `;
 	for (const vul of fixable) output += `* [${vul.name}](#user-content-${CSS.escape(vul.name).replaceAll(/(?<=(^|[^\\]))\\(?!:\\)/g, "\\\\")})\n`;
 	output += "## Fixed vulnerabilities\n";
@@ -16546,7 +16929,13 @@ async function run() {
 		setOutput("issues-fixable", fixable.length);
 		setOutput("issues-force-fixable", forceFixable.length);
 		setOutput("issues-unfixable", totalIssues - fixable.length - forceFixable.length);
-		const formattedOutput = await formatNpmAuditOutput(data);
+		let formattedOutput = await formatNpmAuditOutput(data);
+		if (fix) {
+			info("Running `npm audit` with `fix` flag");
+			await runNpmAudit(true);
+			const changes = await getChanges();
+			formattedOutput += `## Updated dependencies\n<details>\n${formatChanges(changes)}\n</details>\n`;
+		}
 		setOutput("markdown", formattedOutput);
 		if (outputPath) {
 			const resolvedPath = resolve(outputPath);
@@ -16555,10 +16944,6 @@ async function run() {
 				return;
 			}
 			await writeFile(resolvedPath, formattedOutput);
-		}
-		if (fix) {
-			info("Running `npm audit` with `fix` flag");
-			await runNpmAudit(true);
 		}
 	} catch (error) {
 		if (error instanceof Error) setFailed(error);
