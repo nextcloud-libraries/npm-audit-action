@@ -56,7 +56,7 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3.0.1",
     "css.escape": "^1.5.1"
   },
   "devDependencies": {
