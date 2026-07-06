@@ -25,13 +25,13 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
-    "build": "npm run format:write && npm run package",
+    "all": "npm run lint && npm run test && npm run coverage && npm run package",
+    "build": "npm run package",
     "ci-test": "npx vitest run",
     "coverage": "npm run test -- --coverage && npx make-coverage-badge --output-path ./badges/coverage.svg",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "package": "npx esbuild --platform=node --sourcemap --bundle src/index.ts --outdir=dist",
+    "package": "npx rolldown -c rolldown.config.ts",
     "package:watch": "npm run package -- --watch",
     "test": "npx vitest run"
   },
@@ -43,9 +43,9 @@
     "@nextcloud/eslint-config": "^9.0.0",
     "@types/node": "^24.2.0",
     "@vitest/coverage-v8": "^3.1.1",
-    "esbuild": "^0.27.3",
     "eslint": "^10.6.0",
     "make-coverage-badge": "^1.2.0",
+    "rolldown": "^1.1.4",
     "typescript": "^5.9.3",
     "vitest": "^3.1.1"
   },
