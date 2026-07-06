@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "css.escape": "^1.5.1"
+    "css.escape": "^1.5.1",
+    "diff-package-lock": "^1.4.1"
   },
   "devDependencies": {
     "@nextcloud/eslint-config": "^9.0.0",
