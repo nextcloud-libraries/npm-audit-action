@@ -46,7 +46,7 @@
     "eslint": "^10.6.0",
     "make-coverage-badge": "^1.2.0",
     "rolldown": "^1.1.4",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
   "engines": {
