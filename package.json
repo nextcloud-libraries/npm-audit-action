@@ -40,12 +40,12 @@
     "css.escape": "^1.5.1"
   },
   "devDependencies": {
-    "@nextcloud/eslint-config": "^9.0.0",
-    "@types/node": "^26.1.0",
+    "@nextcloud/eslint-config": "^9.0.1",
+    "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
-    "eslint": "^10.6.0",
+    "eslint": "^10.7.0",
     "make-coverage-badge": "^1.2.0",
-    "rolldown": "^1.1.4",
+    "rolldown": "^1.1.5",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },
