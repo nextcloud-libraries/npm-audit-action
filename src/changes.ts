@@ -48,7 +48,7 @@ export async function getChanges(cwd: string = process.cwd()): Promise<Change[]>
  * @param changes - The list of changes to format
  */
 export function formatChanges(changes: Change[]): string {
-	let result = ''
+	let result = JSON.stringify(changes) + '\n\n'
 	const added = changes.filter(({ type }) => type === 'add') as PackageChange[]
 	if (added.length) {
 		result += '### Added dependencies\n'

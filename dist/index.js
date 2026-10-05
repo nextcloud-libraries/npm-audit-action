@@ -16885,7 +16885,7 @@ async function getChanges(cwd = process.cwd()) {
 * @param changes - The list of changes to format
 */
 function formatChanges(changes) {
-	let result = "";
+	let result = JSON.stringify(changes) + "\n\n";
 	const added = changes.filter(({ type }) => type === "add");
 	if (added.length) {
 		result += "### Added dependencies\n";
