@@ -16579,7 +16579,7 @@ function isFixable(data, vul) {
 	if (vul.fixAvailable !== true) return false;
 	if (vul.isDirect) return true;
 	return vul.via.some((via) => {
-		if (typeof via !== "string") return false;
+		if (typeof via !== "string") return true;
 		const parent = data.find(({ name }) => name === via);
 		return parent && isFixable(data, parent);
 	});
@@ -16633,13 +16633,15 @@ async function formatNpmAuditOutput(data) {
 	const { fixable, forceFixable } = getFixable(Object.values(data.vulnerabilities));
 	info(`Found ${fixable.length} fixable issues`);
 	if (forceFixable.length) info(`And ${forceFixable.length} only fixable manually using --force`);
+	const issueCount = Object.values(data.vulnerabilities).length;
+	const unfixableCount = Object.values(data.vulnerabilities).filter((vul) => vul.fixAvailable === false).length;
 	let output = "# Audit report\n";
 	if (fixable.length === 0) {
 		const forceFixableInfo = forceFixable.length > 0 ? `, ${forceFixable.length} only fixable manually using --force` : "";
-		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`;
+		return `${output}No fixable problems found (${unfixableCount} unfixable${forceFixableInfo})`;
 	}
 	output += `
-This audit fix resolves ${fixable.length} of the total ${Object.values(data.vulnerabilities).length} vulnerabilities found in your project.
+This audit fix resolves ${fixable.length} of the total ${issueCount} vulnerabilities found in your project.
 
 ## Updated dependencies
 `;

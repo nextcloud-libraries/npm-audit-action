@@ -125,4 +125,48 @@ describe('formatNpmAuditOutput', () => {
 		expect(output).toMatch(/# Audit report/)
 		expect(output).toMatch(/No fixable problems found \(0 unfixable, 1 only fixable manually using --force\)/)
 	})
+
+	it('treats a transitive package with its own advisory as fixable', async () => {
+		const advisory = { title: 'Some advisory', severity: 'high', url: 'https://example.com/advisory', source: 1, name: 'foo', dependency: 'foo' }
+		const data = {
+			vulnerabilities: {
+				foo: { name: 'foo', isDirect: false, fixAvailable: true, via: [advisory], range: '<1.2.3', nodes: ['node_modules/bar/node_modules/foo'] },
+			},
+		}
+
+		/// @ts-expect-error mocking the object
+		const output = await formatNpmAuditOutput(data)
+		expect(core.info).toHaveBeenCalledWith('Found 1 fixable issues')
+		expect(output).toMatch(/This audit fix resolves 1 of the total 1 vulnerabilities/)
+		expect(output).toMatch(/### `foo`/)
+	})
+
+	it('does not treat a package as fixable if its parent needs --force', async () => {
+		const advisory = { title: 'Some advisory', severity: 'high', url: 'https://example.com/advisory', source: 1, name: 'parent', dependency: 'parent' }
+		const data = {
+			vulnerabilities: {
+				parent: { name: 'parent', isDirect: false, fixAvailable: { name: 'x', version: '2.0.0', isSemVerMajor: true }, via: [advisory], range: '*', nodes: ['node_modules/parent'] },
+				child: { name: 'child', isDirect: false, fixAvailable: true, via: ['parent'], range: '*', nodes: ['node_modules/child'] },
+			},
+		}
+
+		/// @ts-expect-error mocking the object
+		const output = await formatNpmAuditOutput(data)
+		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
+		expect(output).toMatch(/No fixable problems found \(0 unfixable, 2 only fixable manually using --force\)/)
+	})
+
+	it('only counts packages without any fix as unfixable', async () => {
+		const data = {
+			vulnerabilities: {
+				a: { name: 'a', isDirect: true, fixAvailable: false, via: [], range: '*', nodes: [] },
+				b: { name: 'b', isDirect: true, fixAvailable: { name: 'b', version: '2.0.0', isSemVerMajor: true }, via: [], range: '*', nodes: [] },
+				c: { name: 'c', isDirect: true, fixAvailable: false, via: [], range: '*', nodes: [] },
+			},
+		}
+
+		/// @ts-expect-error mocking the object
+		const output = await formatNpmAuditOutput(data)
+		expect(output).toMatch(/No fixable problems found \(2 unfixable, 1 only fixable manually using --force\)/)
+	})
 })
