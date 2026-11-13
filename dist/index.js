@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
-import * as os$1 from "os";
-import os, { EOL } from "os";
+import * as os from "os";
+import os$1, { EOL } from "os";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import { constants, promises } from "fs";
@@ -9,7 +9,7 @@ import * as events from "events";
 import "child_process";
 import "timers";
 import { exec } from "node:child_process";
-import { writeFile } from "node:fs/promises";
+import { writeFile as writeFile$1 } from "node:fs/promises";
 import { resolve } from "node:path";
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
 var __require = /* #__PURE__ */ (() => createRequire(import.meta.url))();
@@ -76,7 +76,7 @@ function toCommandProperties(annotationProperties) {
 */
 function issueCommand(command, properties, message) {
 	const cmd = new Command(command, properties, message);
-	process.stdout.write(cmd.toString() + os$1.EOL);
+	process.stdout.write(cmd.toString() + os.EOL);
 }
 const CMD_STRING = "::";
 var Command = class {
@@ -115,14 +115,14 @@ function issueFileCommand(command, message) {
 	const filePath = process.env[`GITHUB_${command}`];
 	if (!filePath) throw new Error(`Unable to find environment variable for file command ${command}`);
 	if (!fs.existsSync(filePath)) throw new Error(`Missing file at path: ${filePath}`);
-	fs.appendFileSync(filePath, `${toCommandValue(message)}${os$1.EOL}`, { encoding: "utf8" });
+	fs.appendFileSync(filePath, `${toCommandValue(message)}${os.EOL}`, { encoding: "utf8" });
 }
 function prepareKeyValueMessage(key, value) {
 	const delimiter = `ghadelimiter_${crypto.randomUUID()}`;
 	const convertedValue = toCommandValue(value);
 	if (key.includes(delimiter)) throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter}"`);
 	if (convertedValue.includes(delimiter)) throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter}"`);
-	return `${key}<<${delimiter}${os$1.EOL}${convertedValue}${os$1.EOL}${delimiter}`;
+	return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`;
 }
 // node_modules/tunnel/lib/tunnel.js
 var require_tunnel$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
@@ -1834,7 +1834,7 @@ var require_dispatcher_base = /* @__PURE__ */ __commonJSMin(((exports, module) =
 		get webSocketOptions() {
 			return {
 				maxFragments: this[kWebSocketOptions].maxFragments ?? 131072,
-				maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 134217728
+				maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 0x8000000
 			};
 		}
 		get destroyed() {
@@ -6133,7 +6133,7 @@ var require_client_h2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		});
 		return {
 			version: "h2",
-			defaultPipelining: Infinity,
+			defaultPipelining: 1e400,
 			write(...args) {
 				return writeH2(client, ...args);
 			},
@@ -9518,7 +9518,7 @@ var require_pending_interceptors_formatter = /* @__PURE__ */ __commonJSMin(((exp
 				"Status code": statusCode,
 				Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
 				Invocations: timesInvoked,
-				Remaining: persist ? Infinity : times - timesInvoked
+				Remaining: persist ? 1e400 : times - timesInvoked
 			}));
 			this.logger.table(withPrettyHeaders);
 			return this.transform.read().toString();
@@ -9968,7 +9968,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			pick: interceptorOpts?.pick ?? null,
 			dualStack,
 			affinity,
-			maxItems: interceptorOpts?.maxItems ?? Infinity
+			maxItems: interceptorOpts?.maxItems ?? 1e400
 		});
 		return (dispatch) => {
 			return function dnsInterceptor(origDispatchOpts, handler) {
@@ -13051,7 +13051,7 @@ var require_cache = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			}
 			return true;
 		}
-		#internalMatchAll(request, options, maxResponses = Infinity) {
+		#internalMatchAll(request, options, maxResponses = 1e400) {
 			let r = null;
 			if (request !== void 0) {
 				if (request instanceof Request) {
@@ -16064,7 +16064,7 @@ var __awaiter$6 = function(thisArg, _arguments, P, generator) {
 		step((generator = generator.apply(thisArg, _arguments || [])).next());
 	});
 };
-const { access, appendFile, writeFile: writeFile$1 } = promises;
+const { access, appendFile, writeFile } = promises;
 const SUMMARY_ENV_VAR = "GITHUB_STEP_SUMMARY";
 var Summary = class {
 	constructor() {
@@ -16115,7 +16115,7 @@ var Summary = class {
 		return __awaiter$6(this, void 0, void 0, function* () {
 			const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
 			const filePath = yield this.filePath();
-			yield (overwrite ? writeFile$1 : appendFile)(filePath, this._buffer, { encoding: "utf8" });
+			yield (overwrite ? writeFile : appendFile)(filePath, this._buffer, { encoding: "utf8" });
 			return this.emptyBuffer();
 		});
 	}
@@ -16324,8 +16324,8 @@ fs.constants.O_RDONLY;
 process.platform;
 events.EventEmitter;
 events.EventEmitter;
-os.platform();
-os.arch();
+os$1.platform();
+os$1.arch();
 /**
 * The code to exit an action
 */
@@ -16389,7 +16389,7 @@ function getBooleanInput(name, options) {
 */
 function setOutput(name, value) {
 	if (process.env["GITHUB_OUTPUT"] || "") return issueFileCommand("OUTPUT", prepareKeyValueMessage(name, value));
-	process.stdout.write(os$1.EOL);
+	process.stdout.write(os.EOL);
 	issueCommand("set-output", { name }, toCommandValue(value));
 }
 /**
@@ -16421,10 +16421,11 @@ function error(message, properties = {}) {
 * @param message info message
 */
 function info(message) {
-	process.stdout.write(message + os$1.EOL);
+	process.stdout.write(message + os.EOL);
 }
 /*! https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
 (/* @__PURE__ */ __commonJSMin(((exports, module, this$1) => {
+	var define;
 	(function(root, factory) {
 		if (typeof exports == "object") module.exports = factory(root);
 		else if (typeof define == "function" && define.amd) define([], factory.bind(root, root));
@@ -16480,7 +16481,7 @@ function isFixable(data, vul, seen = /* @__PURE__ */ new Set()) {
 	if (seen.has(vul.name)) return false;
 	seen.add(vul.name);
 	return vul.via.some((via) => {
-		if (typeof via !== "string") return false;
+		if (typeof via !== "string") return true;
 		const parent = data.find(({ name }) => name === via);
 		return parent && isFixable(data, parent, seen);
 	});
@@ -16534,13 +16535,15 @@ async function formatNpmAuditOutput(data) {
 	const { fixable, forceFixable } = getFixable(Object.values(data.vulnerabilities));
 	info(`Found ${fixable.length} fixable issues`);
 	if (forceFixable.length) info(`And ${forceFixable.length} only fixable manually using --force`);
+	const issueCount = Object.values(data.vulnerabilities).length;
+	const unfixableCount = Object.values(data.vulnerabilities).filter((vul) => vul.fixAvailable === false).length;
 	let output = "# Audit report\n";
 	if (fixable.length === 0) {
 		const forceFixableInfo = forceFixable.length > 0 ? `, ${forceFixable.length} only fixable manually using --force` : "";
-		return `${output}No fixable problems found (${Object.values(data.vulnerabilities).length - forceFixable.length} unfixable${forceFixableInfo})`;
+		return `${output}No fixable problems found (${unfixableCount} unfixable${forceFixableInfo})`;
 	}
 	output += `
-This audit fix resolves ${fixable.length} of the total ${Object.values(data.vulnerabilities).length} vulnerabilities found in your project.
+This audit fix resolves ${fixable.length} of the total ${issueCount} vulnerabilities found in your project.
 
 ## Updated dependencies
 `;
@@ -16610,7 +16613,7 @@ async function run() {
 				setFailed("Invalid \"output-path\"");
 				return;
 			}
-			await writeFile(resolvedPath, formattedOutput);
+			await writeFile$1(resolvedPath, formattedOutput);
 		}
 		if (fix) {
 			info("Running `npm audit` with `fix` flag");
