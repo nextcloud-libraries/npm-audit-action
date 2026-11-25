@@ -18,8 +18,9 @@ import 'css.escape'
  *
  * @param data - The list of vulnerabilities to check against
  * @param vul - The vulnerability to check
+ * @param seen - Names of vulnerabilities already visited on this path, guards against cycles
  */
-function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
+function isFixable(data: Vulnerability[], vul: Vulnerability, seen: Set<string> = new Set()): boolean {
 	if (vul.fixAvailable !== true) {
 		// could be "false" -> not fixable at all
 		// or an object -> only with --force
@@ -31,13 +32,20 @@ function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
 		return true
 	}
 
+	// dependency graphs can contain cycles (e.g. monorepo packages depending on
+	// each other), so a vulnerability already on the current path is not fixable through it
+	if (seen.has(vul.name)) {
+		return false
+	}
+	seen.add(vul.name)
+
 	return vul.via.some((via) => {
 		if (typeof via !== 'string') {
 			// this is a advisatory and no fix available - skip
 			return false
 		}
 		const parent = data.find(({ name }) => name === via)
-		return parent && isFixable(data, parent)
+		return parent && isFixable(data, parent, seen)
 	})
 }
 
@@ -46,7 +54,7 @@ function isFixable(data: Vulnerability[], vul: Vulnerability): boolean {
  *
  * @param data - The list of vulnerabilities to check
  */
-function getFixable(data: Vulnerability[]) {
+export function getFixable(data: Vulnerability[]) {
 	const generalFixable = data.filter((vul) => vul.fixAvailable !== false)
 	const fixable = generalFixable.filter((vul) => isFixable(data, vul))
 	const forceFixable = generalFixable.filter((vul) => !fixable.includes(vul))

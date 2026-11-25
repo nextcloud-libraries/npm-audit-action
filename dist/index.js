@@ -16574,14 +16574,17 @@ function info(message) {
 *
 * @param data - The list of vulnerabilities to check against
 * @param vul - The vulnerability to check
+* @param seen - Names of vulnerabilities already visited on this path, guards against cycles
 */
-function isFixable(data, vul) {
+function isFixable(data, vul, seen = /* @__PURE__ */ new Set()) {
 	if (vul.fixAvailable !== true) return false;
 	if (vul.isDirect) return true;
+	if (seen.has(vul.name)) return false;
+	seen.add(vul.name);
 	return vul.via.some((via) => {
 		if (typeof via !== "string") return false;
 		const parent = data.find(({ name }) => name === via);
-		return parent && isFixable(data, parent);
+		return parent && isFixable(data, parent, seen);
 	});
 }
 /**
