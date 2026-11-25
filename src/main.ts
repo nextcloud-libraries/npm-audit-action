@@ -9,6 +9,7 @@ import * as core from '@actions/core'
 import { exec } from 'node:child_process'
 import { writeFile } from 'node:fs/promises'
 import { resolve as resolvePath } from 'node:path'
+import { formatChanges, getChanges } from './changes.ts'
 
 import 'css.escape'
 
@@ -127,7 +128,7 @@ export async function formatNpmAuditOutput(data: NPMAudit): Promise<string> {
 	output += `
 This audit fix resolves ${fixable.length} of the total ${issueCount} vulnerabilities found in your project.
 
-## Updated dependencies
+## Updated vulnerable dependencies
 `
 	for (const vul of fixable) {
 		// we need to encode \ as \\ for Markdown
@@ -206,7 +207,16 @@ export async function run(): Promise<void> {
 		core.setOutput('issues-force-fixable', forceFixable.length)
 		core.setOutput('issues-unfixable', totalIssues - fixable.length - forceFixable.length)
 
-		const formattedOutput = await formatNpmAuditOutput(data)
+		let formattedOutput = await formatNpmAuditOutput(data)
+		if (fix) {
+			core.info('Running `npm audit` with `fix` flag')
+			await runNpmAudit(true)
+			try {
+				formattedOutput += formatChanges(await getChanges())
+			} catch (error) {
+				core.warning(`Could not list the changed dependencies: ${error instanceof Error ? error.message : error}`)
+			}
+		}
 		core.setOutput('markdown', formattedOutput)
 
 		if (outputPath) {
@@ -216,11 +226,6 @@ export async function run(): Promise<void> {
 				return
 			}
 			await writeFile(resolvedPath, formattedOutput)
-		}
-
-		if (fix) {
-			core.info('Running `npm audit` with `fix` flag')
-			await runNpmAudit(true)
 		}
 	} catch (error) {
 		if (error instanceof Error) {
