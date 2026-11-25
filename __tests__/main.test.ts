@@ -71,7 +71,7 @@ describe('runNpmAudit', () => {
 			callback(new Error('Some error'), '', 'An error happened')
 		})
 
-		expect(async () => await runNpmAudit(false)).rejects.toThrowError(/Some error/)
+		await expect(runNpmAudit(false)).rejects.toThrowError(/Some error/)
 		expect(childProcess.exec).toHaveBeenCalled()
 		expect(core.debug).toHaveBeenCalledWith('[npm audit]: An error happened')
 	})
