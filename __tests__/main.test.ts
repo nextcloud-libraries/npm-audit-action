@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { formatNpmAuditOutput, runNpmAudit } from '../src/main.js'
+import { formatNpmAuditOutput, getFixable, runNpmAudit } from '../src/main.js'
 
 const core = vi.hoisted(() => ({
 	debug: vi.fn(),
@@ -124,5 +124,43 @@ describe('formatNpmAuditOutput', () => {
 		expect(core.info).toHaveBeenCalledWith('Found 0 fixable issues')
 		expect(output).toMatch(/# Audit report/)
 		expect(output).toMatch(/No fixable problems found \(0 unfixable, 1 only fixable manually using --force\)/)
+	})
+})
+
+describe('getFixable', () => {
+	it('marks vulnerabilities fixable through a fixable parent', () => {
+		const data = [
+			{ name: 'foo', isDirect: true, fixAvailable: true, via: [] },
+			{ name: 'bar', isDirect: false, fixAvailable: true, via: ['foo'] },
+		]
+
+		/// @ts-expect-error mocking the object
+		const { fixable, forceFixable } = getFixable(data)
+		expect(fixable.map((vul) => vul.name)).toEqual(['foo', 'bar'])
+		expect(forceFixable).toEqual([])
+	})
+
+	it('does not recurse infinitely on cyclic dependency graphs', () => {
+		const data = [
+			{ name: 'a', isDirect: false, fixAvailable: true, via: ['b'] },
+			{ name: 'b', isDirect: false, fixAvailable: true, via: ['a'] },
+		]
+
+		/// @ts-expect-error mocking the object
+		expect(() => getFixable(data)).not.toThrow()
+		/// @ts-expect-error mocking the object
+		expect(getFixable(data).fixable).toEqual([])
+	})
+
+	it('still resolves cycles that lead to a fixable direct dependency', () => {
+		const data = [
+			{ name: 'a', isDirect: false, fixAvailable: true, via: ['b'] },
+			{ name: 'b', isDirect: false, fixAvailable: true, via: ['a', 'root'] },
+			{ name: 'root', isDirect: true, fixAvailable: true, via: [] },
+		]
+
+		/// @ts-expect-error mocking the object
+		const { fixable } = getFixable(data)
+		expect(fixable.map((vul) => vul.name).sort()).toEqual(['a', 'b', 'root'])
 	})
 })
